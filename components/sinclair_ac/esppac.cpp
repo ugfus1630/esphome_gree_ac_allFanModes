@@ -40,8 +40,8 @@ void SinclairAC::setup()
         fan_modes::FAN_HIGH,
         fan_modes::FAN_TURBO
 
-    ESP_LOGI(TAG, "Sinclair AC component v%s starting...", VERSION);
-}
+    ESP_LOGI(TAG, "Sinclair AC component v%s starting...", VERSION)
+};
 
 void SinclairAC::loop()
 {

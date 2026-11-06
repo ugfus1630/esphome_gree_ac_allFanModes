@@ -1,4 +1,4 @@
-I only added the "medium low" and "medium high" fan modes form my Gree Amber GWH18YE.
+I only added the "medium low" and "medium high" fan modes for my Gree Amber GWH18YE.
 I also recommend https://github.com/marcelstoer/nodemcu-pyflasher/releases to flash first time.
 
 # Open source WIFI module replacement for Gree protocol based AC's for Home Assistant.

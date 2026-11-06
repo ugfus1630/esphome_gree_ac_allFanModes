@@ -667,6 +667,13 @@ void SinclairACCNT::handle_packet()
              if (lastpacket[i] != this->serialProcess_.data[i])
                  newdata = true;
         }
+
+                // Check fan speed 1 changes
+        if (lastpacket[protocol::REPORT_FAN_SPD1_BYTE] !=
+            this->serialProcess_.data[protocol::REPORT_FAN_SPD1_BYTE])
+        {
+            newdata = true;
+        }
         
         /* now process the data */
         this->processUnitReport();

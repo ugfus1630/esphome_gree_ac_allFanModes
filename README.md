@@ -1,3 +1,6 @@
+I only added the "medium low" and "medium high" fan modes form my Gree Amber GWH18YE.
+I also recommend https://github.com/marcelstoer/nodemcu-pyflasher/releases to flash first time.
+
 # Open source WIFI module replacement for Gree protocol based AC's for Home Assistant.
 This repository adds support for ESP-based WiFi modules to interface with Gree/Sinclair AC units.
 It's forked from https://github.com/piotrva/esphome_gree_ac, big thanks to @piotrva for his work!

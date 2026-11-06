@@ -28,9 +28,10 @@ climate::ClimateTraits SinclairAC::traits()
 
 void SinclairAC::setup()
 {
-  // Initialize times
+    // Initialize times
     this->init_time_ = millis();
     this->last_packet_sent_ = millis();
+
     this->set_supported_custom_fan_modes({
         fan_modes::FAN_AUTO,
         fan_modes::FAN_LOW,
@@ -39,9 +40,10 @@ void SinclairAC::setup()
         fan_modes::FAN_MEDH,
         fan_modes::FAN_HIGH,
         fan_modes::FAN_TURBO
+    });
 
-    ESP_LOGI(TAG, "Sinclair AC component v%s starting...", VERSION)
-};
+    ESP_LOGI(TAG, "Sinclair AC component v%s starting...", VERSION);
+}
 
 void SinclairAC::loop()
 {

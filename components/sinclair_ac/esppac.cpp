@@ -182,7 +182,14 @@ void SinclairAC::update_temperature_filter_(uint32_t now)
 
     this->temperature_filter_value_ +=
         alpha * (this->temperature_filter_input_ - this->temperature_filter_value_);
-
+    ESP_LOGD(TAG,
+        "TEMP FILTER: raw=%.1f C | filtered=%.3f C | output=%.0f C | "
+        "alpha=%.4f | elapsed=%u ms",
+        this->temperature_filter_input_,
+        this->temperature_filter_value_,
+        this->current_temperature,
+        alpha,
+        elapsed);
     this->temperature_filter_last_update_ = now;
 
     // 0.1 C hysteresis around the integer switching threshold

@@ -78,7 +78,7 @@ void SinclairACCNT::loop()
 
         if (this->update_ == ACUpdate::NoUpdate)
         {
-            this->processUnitReport(); /* this will update state of components in HA as well as internal settings */
+            handle_packet();
         }
     }
 
@@ -673,8 +673,8 @@ void SinclairACCNT::handle_packet()
         
         /* now process the data */
         bool state_changed = this->processUnitReport();
-
-        // Publish if any state, including filtered temperature, changed
+        
+        //Only send new data to HA if state changed
         if (newdata || state_changed || reqmodechange)
         {
             if (reqmodechange)

@@ -750,8 +750,13 @@ bool SinclairACCNT::processUnitReport()
         float newCurrentTemperature = (float)(this->serialProcess_.data[protocol::REPORT_TEMP_ACT_BYTE] - 40);
     //    float newCurrentTemperature = (float)(((this->serialProcess_.data[protocol::REPORT_TEMP_ACT_BYTE] & protocol::REPORT_TEMP_ACT_MASK) >> protocol::REPORT_TEMP_ACT_POS)
      //       - protocol::REPORT_TEMP_ACT_OFF) / protocol::REPORT_TEMP_ACT_DIV;
-        if (this->current_temperature != newCurrentTemperature) hasChanged = true;
+        float previous_temperature = this->current_temperature;
+
         this->update_current_temperature(newCurrentTemperature);
+
+        if (this->current_temperature != previous_temperature) {
+            hasChanged = true;
+        }
     }
 
     std::string verticalSwing = determine_vertical_swing();

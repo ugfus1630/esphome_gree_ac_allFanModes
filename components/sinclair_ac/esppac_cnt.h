@@ -185,7 +185,6 @@ class SinclairACCNT : public SinclairAC {
 
         bool reqmodechange = false;
         unsigned char lastpacket[60];
-        unsigned char lastroomtemp;
 
         bool verify_packet();
         void handle_packet();

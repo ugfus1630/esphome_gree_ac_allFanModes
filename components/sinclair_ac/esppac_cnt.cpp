@@ -78,7 +78,7 @@ void SinclairACCNT::loop()
 
         if (this->update_ == ACUpdate::NoUpdate)
         {
-            (); /* this will update state of components in HA as well as internal settings */
+            this->processUnitReport(); /* this will update state of components in HA as well as internal settings */
         }
     }
 

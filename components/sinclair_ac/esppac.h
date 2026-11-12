@@ -107,7 +107,7 @@ class SinclairAC : public Component, public uart::UARTDevice, public climate::Cl
         void set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor);
         
         // Time-based exponential temperature filter
-        static const uint32_t TEMP_FILTER_TIME_CONSTANT_MS = 30000;
+        static const uint32_t TEMP_FILTER_TIME_CONSTANT_MS = 5000;
         static const uint32_t TEMP_FILTER_UPDATE_INTERVAL_MS = 1000;
         
         float temperature_filter_value_ = 0.0f;

@@ -1,6 +1,6 @@
 // based on: https://github.com/DomiStyle/esphome-panasonic-ac
 #include "esppac.h"
-
+#include <cmath>
 #include "esphome/core/log.h"
 
 namespace esphome {

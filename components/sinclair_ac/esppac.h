@@ -105,13 +105,19 @@ class SinclairAC : public Component, public uart::UARTDevice, public climate::Cl
         void set_save_switch(switch_::Switch *plasma_switch);
 
         void set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor);
-        // Current temperature moving average filter
-        static const uint8_t TEMP_FILTER_SIZE = 25;
-        float temperature_samples_[TEMP_FILTER_SIZE] = {};
-        uint8_t temperature_sample_index_ = 0;
+        
+        // Time-based exponential temperature filter
+        static const uint32_t TEMP_FILTER_TIME_CONSTANT_MS = 30000;
+        static const uint32_t TEMP_FILTER_UPDATE_INTERVAL_MS = 1000;
+        
+        float temperature_filter_value_ = 0.0f;
+        float temperature_filter_input_ = 0.0f;
+        uint32_t temperature_filter_last_update_ = 0;
         bool temperature_filter_initialized_ = false;
+        
+        void update_temperature_filter_(uint32_t now);
+        
         void setup() override;
-        void loop() override;
 
     protected:
         select::Select *vertical_swing_select_   = nullptr; /* Advanced vertical swing select */

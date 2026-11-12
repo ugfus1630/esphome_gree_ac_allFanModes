@@ -123,7 +123,57 @@ void SinclairAC::update_current_temperature(float temperature)
         return;
     }
 
-    this->current_temperature = temperature;
+    // First measurement: initialize the entire buffer
+    if (!this->temperature_filter_initialized_) {
+        for (uint8_t i = 0; i < TEMP_FILTER_SIZE; i++) {
+            this->temperature_samples_[i] = temperature;
+        }
+
+        this->temperature_sample_index_ = 0;
+        this->temperature_filter_initialized_ = true;
+        this->current_temperature = temperature;
+
+        ESP_LOGI(TAG, "Temperature filter initialized: %.1f C", temperature);
+        return;
+    }
+
+    // Insert new sample into circular buffer
+    this->temperature_samples_[this->temperature_sample_index_] = temperature;
+
+    this->temperature_sample_index_ =
+        (this->temperature_sample_index_ + 1) % TEMP_FILTER_SIZE;
+
+    // Calculate 25-sample moving average
+    float sum = 0.0f;
+
+    for (uint8_t i = 0; i < TEMP_FILTER_SIZE; i++) {
+        sum += this->temperature_samples_[i];
+    }
+
+    // Round average to one decimal place
+    float filtered_temperature =
+        roundf((sum / TEMP_FILTER_SIZE) * 10.0f) / 10.0f;
+
+    // Hysteresis around the 0.5 C rounding boundary
+    float new_temperature = this->current_temperature;
+
+    if (filtered_temperature >= this->current_temperature + 0.6f) {
+        new_temperature = roundf(filtered_temperature);
+    }
+    else if (filtered_temperature <= this->current_temperature - 0.6f) {
+        new_temperature = roundf(filtered_temperature);
+    }
+
+    // Publish only when the integer temperature actually changes
+    if (new_temperature != this->current_temperature) {
+        ESP_LOGD(TAG,
+            "Temperature filter: raw=%.1f C, average=%.1f C, output=%.0f C",
+            temperature,
+            filtered_temperature,
+            new_temperature);
+
+        this->current_temperature = new_temperature;
+    }
 }
 
 void SinclairAC::update_target_temperature(float temperature)

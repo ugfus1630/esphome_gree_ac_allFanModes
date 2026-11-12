@@ -118,6 +118,7 @@ class SinclairAC : public Component, public uart::UARTDevice, public climate::Cl
         void update_temperature_filter_(uint32_t now);
         
         void setup() override;
+        void loop() override;
 
     protected:
         select::Select *vertical_swing_select_   = nullptr; /* Advanced vertical swing select */

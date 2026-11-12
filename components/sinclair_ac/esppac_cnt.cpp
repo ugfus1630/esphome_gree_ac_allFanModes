@@ -78,7 +78,7 @@ void SinclairACCNT::loop()
 
         if (this->update_ == ACUpdate::NoUpdate)
         {
-            handle_packet(); /* this will update state of components in HA as well as internal settings */
+            (); /* this will update state of components in HA as well as internal settings */
         }
     }
 
@@ -655,10 +655,6 @@ void SinclairACCNT::handle_packet()
              if (lastpacket[i] != this->serialProcess_.data[i])
                  newdata = true;
         }
-
-        if (lastroomtemp != this->serialProcess_.data[42])
-            newdata = true;
-        lastroomtemp = this->serialProcess_.data[42];
         
         for (int i = 8; i < 11; i++)
         {
@@ -676,10 +672,10 @@ void SinclairACCNT::handle_packet()
         }
         
         /* now process the data */
-        this->processUnitReport();
+        bool state_changed = this->processUnitReport();
 
-        //Only send new data to HA if we did not initiate that ourselves!
-        if (newdata || reqmodechange)
+        // Publish if any state, including filtered temperature, changed
+        if (newdata || state_changed || reqmodechange)
         {
             if (reqmodechange)
                 ESP_LOGD(TAG, "reqmodechange true !");

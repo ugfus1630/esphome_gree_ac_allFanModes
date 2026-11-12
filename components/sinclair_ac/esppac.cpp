@@ -47,7 +47,23 @@ void SinclairAC::setup()
 
 void SinclairAC::loop()
 {
-    read_data();  // Read data from UART (if there is any)
+    read_data();
+
+    if (this->temperature_filter_initialized_) {
+        uint32_t now = millis();
+
+        if (now - this->temperature_filter_last_update_ >= TEMP_FILTER_UPDATE_INTERVAL_MS) {
+            float previous_temperature = this->current_temperature;
+
+            this->update_temperature_filter_(now);
+
+            if (this->current_temperature != previous_temperature) {
+                ESP_LOGD(TAG, "Temperature filter timer update: %.0f C",
+                         this->current_temperature);
+                this->publish_state();
+            }
+        }
+    }
 }
 
 void SinclairAC::read_data()
@@ -123,53 +139,68 @@ void SinclairAC::update_current_temperature(float temperature)
         return;
     }
 
-    // First measurement: initialize the entire buffer
+    // First measurement: initialize filter immediately
     if (!this->temperature_filter_initialized_) {
-        for (uint8_t i = 0; i < TEMP_FILTER_SIZE; i++) {
-            this->temperature_samples_[i] = temperature;
-        }
-
-        this->temperature_sample_index_ = 0;
+        this->temperature_filter_value_ = temperature;
+        this->temperature_filter_input_ = temperature;
+        this->temperature_filter_last_update_ = millis();
         this->temperature_filter_initialized_ = true;
-        this->current_temperature = temperature;
 
-        ESP_LOGI(TAG, "Temperature filter initialized: %.1f C", temperature);
+        this->current_temperature = roundf(temperature);
+
+        ESP_LOGI(TAG, "Temperature filter initialized: %.0f C",
+                 this->current_temperature);
         return;
     }
 
-    // Insert new sample into circular buffer
-    this->temperature_samples_[this->temperature_sample_index_] = temperature;
+    uint32_t now = millis();
 
-    this->temperature_sample_index_ =
-        (this->temperature_sample_index_ + 1) % TEMP_FILTER_SIZE;
+    // Apply elapsed time using the previous input value
+    this->update_temperature_filter_(now);
 
-    // Calculate 25-sample moving average
-    float sum = 0.0f;
+    // Store the newest raw measurement
+    this->temperature_filter_input_ = temperature;
+}
 
-    for (uint8_t i = 0; i < TEMP_FILTER_SIZE; i++) {
-        sum += this->temperature_samples_[i];
+
+void SinclairAC::update_temperature_filter_(uint32_t now)
+{
+    if (!this->temperature_filter_initialized_) {
+        return;
     }
 
-    // Round average to one decimal place
-    float filtered_temperature =
-        roundf((sum / TEMP_FILTER_SIZE) * 10.0f) / 10.0f;
+    uint32_t elapsed = now - this->temperature_filter_last_update_;
 
-    // Hysteresis around the 0.5 C rounding boundary
+    if (elapsed == 0) {
+        return;
+    }
+
+    // Time-based exponential low-pass filter
+    float alpha = 1.0f - expf(
+        -(float) elapsed / TEMP_FILTER_TIME_CONSTANT_MS
+    );
+
+    this->temperature_filter_value_ +=
+        alpha * (this->temperature_filter_input_ - this->temperature_filter_value_);
+
+    this->temperature_filter_last_update_ = now;
+
+    // 0.1 C hysteresis around the integer switching threshold
     float new_temperature = this->current_temperature;
 
-    if (filtered_temperature >= this->current_temperature + 0.6f) {
-        new_temperature = roundf(filtered_temperature);
+    if (this->temperature_filter_value_ >= this->current_temperature + 0.6f) {
+        new_temperature = roundf(this->temperature_filter_value_);
     }
-    else if (filtered_temperature <= this->current_temperature - 0.6f) {
-        new_temperature = roundf(filtered_temperature);
+    else if (this->temperature_filter_value_ <= this->current_temperature - 0.6f) {
+        new_temperature = roundf(this->temperature_filter_value_);
     }
 
-    // Publish only when the integer temperature actually changes
+    // Update only when the displayed whole-degree value changes
     if (new_temperature != this->current_temperature) {
         ESP_LOGD(TAG,
-            "Temperature filter: raw=%.1f C, average=%.1f C, output=%.0f C",
-            temperature,
-            filtered_temperature,
+            "Temperature filter: input=%.1f C, filtered=%.2f C, output=%.0f C",
+            this->temperature_filter_input_,
+            this->temperature_filter_value_,
             new_temperature);
 
         this->current_temperature = new_temperature;

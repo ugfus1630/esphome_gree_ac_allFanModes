@@ -105,7 +105,11 @@ class SinclairAC : public Component, public uart::UARTDevice, public climate::Cl
         void set_save_switch(switch_::Switch *plasma_switch);
 
         void set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor);
-
+        // Current temperature moving average filter
+        static const uint8_t TEMP_FILTER_SIZE = 25;
+        float temperature_samples_[TEMP_FILTER_SIZE] = {};
+        uint8_t temperature_sample_index_ = 0;
+        bool temperature_filter_initialized_ = false;
         void setup() override;
         void loop() override;
 

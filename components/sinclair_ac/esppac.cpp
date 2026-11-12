@@ -160,6 +160,7 @@ void SinclairAC::update_current_temperature(float temperature)
 
     // Store the newest raw measurement
     this->temperature_filter_input_ = temperature;
+    ESP_LOGD(TAG, "TEMP RX: new raw temperature=%.1f C", temperature);
 }
 
 

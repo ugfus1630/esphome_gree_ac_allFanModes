@@ -196,10 +196,10 @@ void SinclairAC::update_temperature_filter_(uint32_t now)
     // 0.1 C hysteresis around the integer switching threshold
     float new_temperature = this->current_temperature;
     
-    if (this->temperature_filter_value_ >= this->current_temperature + 0.6f) {
+    if (this->temperature_filter_value_ >= this->current_temperature + 0.75f) {
         new_temperature = roundf(this->temperature_filter_value_);
     }
-    else if (this->temperature_filter_value_ <= this->current_temperature - 0.6f) {
+    else if (this->temperature_filter_value_ <= this->current_temperature - 0.75f) {
         new_temperature = roundf(this->temperature_filter_value_);
     }
 

@@ -464,10 +464,20 @@ void SinclairAC::set_save_switch(switch_::Switch *save_switch)
 
 void SinclairAC::log_packet(std::vector<uint8_t> data, bool outgoing)
 {
+    // Allocate enough space for formatted hexadecimal output
+    std::vector<char> buffer(data.size() * 3 + 1);
+
+    format_hex_pretty_to(
+        buffer.data(),
+        buffer.size(),
+        data.data(),
+        data.size()
+    );
+
     if (outgoing) {
-        ESP_LOGV(TAG, "TX: %s", format_hex_pretty(data).c_str());
+        ESP_LOGV(TAG, "TX: %s", buffer.data());
     } else {
-        ESP_LOGV(TAG, "RX: %s", format_hex_pretty(data).c_str());
+        ESP_LOGV(TAG, "RX: %s", buffer.data());
     }
 }
 
